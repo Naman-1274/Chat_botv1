@@ -3,3 +3,4 @@ together
 python-dotenv
 asyncio
 fpdf
+-e.

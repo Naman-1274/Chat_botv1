@@ -17,6 +17,7 @@ List_of_files = [
     "requirements.txt",
     "README.md",
     "run_app.py",
+    "setup.py",
  
     
 ]
