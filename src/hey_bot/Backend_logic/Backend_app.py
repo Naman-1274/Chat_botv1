@@ -18,12 +18,15 @@ async def run_llm(model_name: str, prompt: str, async_client: AsyncTogether) -> 
 async def main_mixture(
     prompt: str,
     async_client: AsyncTogether,
-    delay_between: float = 1.0,
-    stream_delay: float = 0.2,
-):
+    references: list[str], 
+    aggregator: str,
+    style: str,
+    delay_between: float = 1.5,
+    stream_delay: float = 0.3,
+) -> str:
     st.subheader("Individual Model Responses")
     results = []
-    for model_name in REFERENCE_MODELS:
+    for model_name in references:
         output = await run_llm(model_name, prompt, async_client)
         results.append(output)
         with st.expander(f"Response from {model_name}"):
@@ -33,20 +36,26 @@ async def main_mixture(
     st.subheader("Aggregated Response")
     final_container = st.empty()
     final_answer = ""
+    
+    system_prompt = AGGREGATOR_SYSTEM_PROMPT(style)
 
     stream = await async_client.chat.completions.create(
         model=AGGREGATOR_MODEL,
         messages=[
-            {"role": "system", "content": AGGREGATOR_SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": "\n\n".join(results)},
         ],
         stream=True,
     )
 
     async for chunk in stream:
-        delta = chunk.choices[0].delta.content or ""
+        if chunk.choices and hasattr(chunk.choices[0].delta, "content"):
+            delta = chunk.choices[0].delta.content or ""
+        else:
+            delta = ""
         final_answer += delta
         final_container.markdown(final_answer + "▌")
         await asyncio.sleep(stream_delay)
 
     final_container.markdown(final_answer)
+    return final_answer
