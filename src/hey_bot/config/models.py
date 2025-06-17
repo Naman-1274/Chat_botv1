@@ -6,7 +6,7 @@ REFERENCE_MODELS = {
 }
 
 
-AGGREGATOR_MODEL = "mistralai/Mixtral-8x22B-Instruct-v0.1"
+AGGREGATOR_MODEL = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"
 
 
 
